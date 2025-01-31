@@ -57,6 +57,9 @@ async function syncQuotesWithServer() {
 
     // Save the updated quotes back to localStorage
     saveQuotes();
+
+    // Show alert for successful sync
+    alert('Quotes synced with server!');
     showSyncNotification('Quotes synchronized with the server!');
 }
 
