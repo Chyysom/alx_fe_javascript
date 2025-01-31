@@ -1,18 +1,52 @@
-// Simulate a conflict resolution strategy: server data takes precedence
-function syncQuotesWithServer() {
-    fetchQuotesFromServer()
-        .then(quotesFromServer => {
-            if (quotesFromServer.length === 0) {
-                return;
-            }
+const serverUrl = 'https://jsonplaceholder.typicode.com/posts'; // URL for the mock API
 
-            // Compare and merge the local and server quotes
-            quotes = mergeQuotes(quotes, quotesFromServer);
+// Use async/await for fetching quotes from the server
+async function fetchQuotesFromServer() {
+    try {
+        const response = await fetch(serverUrl);
+        const data = await response.json(); // Parse the JSON data
+        const quotesFromServer = data.map(item => ({
+            text: item.title, // Using title as quote text for this simulation
+            category: item.userId.toString() // Mapping userId to categories
+        }));
+        return quotesFromServer;
+    } catch (error) {
+        console.error('Error fetching data from the server:', error);
+        return [];
+    }
+}
 
-            // Save the updated quotes back to localStorage
-            saveQuotes();
-            alert('Quotes synchronized with server!');
+// Use async/await for posting a new quote to the server
+async function postQuoteToServer(newQuote) {
+    try {
+        const response = await fetch(serverUrl, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(newQuote)
         });
+        const data = await response.json();
+        console.log('Posted data:', data);
+    } catch (error) {
+        console.error('Error posting data to the server:', error);
+    }
+}
+
+// Simulate syncing the quotes with the server
+async function syncQuotesWithServer() {
+    const quotesFromServer = await fetchQuotesFromServer();
+    if (quotesFromServer.length === 0) {
+        showSyncNotification('Error fetching quotes from the server.');
+        return;
+    }
+
+    // Compare and merge local and server quotes
+    quotes = mergeQuotes(quotes, quotesFromServer);
+
+    // Save the updated quotes back to localStorage
+    saveQuotes();
+    showSyncNotification('Quotes synchronized with the server!');
 }
 
 // Merge the local quotes with the server's quotes, preferring the server's data
@@ -41,6 +75,19 @@ function mergeQuotes(localQuotes, serverQuotes) {
     });
 
     return mergedQuotes;
+}
+
+// Notification system to show when quotes are synchronized
+function showSyncNotification(message) {
+    const notification = document.createElement('div');
+    notification.className = 'sync-notification';
+    notification.textContent = message;
+    document.body.appendChild(notification);
+
+    // Remove the notification after 5 seconds
+    setTimeout(() => {
+        notification.remove();
+    }, 5000);
 }
 
 // Set up periodic sync every 30 seconds
