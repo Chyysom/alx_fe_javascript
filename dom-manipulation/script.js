@@ -1,5 +1,16 @@
 const serverUrl = 'https://jsonplaceholder.typicode.com/posts'; // URL for the mock API
 
+// Function to save quotes to localStorage
+function saveQuotes() {
+    localStorage.setItem('quotes', JSON.stringify(quotes)); // Save the quotes array as a string
+}
+
+// Function to load quotes from localStorage
+function loadQuotes() {
+    const savedQuotes = localStorage.getItem('quotes');
+    return savedQuotes ? JSON.parse(savedQuotes) : []; // If no quotes are found, return an empty array
+}
+
 // Use async/await for fetching quotes from the server
 async function fetchQuotesFromServer() {
     try {
@@ -96,3 +107,5 @@ setInterval(syncQuotesWithServer, 30000); // Fetch from the server every 30 seco
 // Call the sync function once on page load to ensure data is up-to-date
 syncQuotesWithServer();
 
+// On page load, load the saved quotes from localStorage
+let quotes = loadQuotes();
